@@ -10,13 +10,13 @@ THREAD = server_thread
 
 all: $(CLIENT) $(FORK) $(THREAD) 
 
-$(CLIENT): $(CLIENT).cpp
+$(CLIENT): $(CLIENT).cpp library.h
 			$(CC) $(CLIENT).cpp -o $(CLIENT)
 
-$(FORK): $(FORK).cpp
+$(FORK): $(FORK).cpp library.h
 			$(CC) $(FORK).cpp $(CFLAGS) -o $(FORK)
 
-$(THREAD): $(THREAD).cpp
+$(THREAD): $(THREAD).cpp library.h
 			$(CC) $(THREAD).cpp $(CFLAGS) -o $(THREAD)
 
 clean-bin: 

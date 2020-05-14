@@ -30,16 +30,9 @@
 #include <netdb.h>
 #include <sys/wait.h>
 
-#define STR_CLOSE               "close"
+#include "library.h"
 
-//***************************************************************************
-// log messages
-
-#define LOG_ERROR               0       // errors
-#define LOG_INFO                1       // information and notifications
-#define LOG_DEBUG               2       // debug messages
-
-#define NUM_CLIENT 100
+#define NUM_CLIENT 20
 
 // debug flag
 int debug = LOG_INFO;
@@ -326,11 +319,11 @@ int main( int argn, char **arg )
     cl_addr.sin_port = htons( port );
     freeaddrinfo( ai_ans );
 
-    for( int i = 0; i < NUM_CLIENT; i ++ )
-    {
+    //for( int i = 0; i < NUM_CLIENT; i ++ )
+    //{
 
         // socket creation
-        sock_server = socket( AF_INET, SOCK_STREAM, 0 );
+        /*sock_server = socket( AF_INET, SOCK_STREAM, 0 );
         if ( sock_server == -1 )
         {
             log_msg( LOG_ERROR, "Unable to create socket.");
@@ -353,24 +346,49 @@ int main( int argn, char **arg )
         getpeername( sock_server, ( sockaddr * ) &cl_addr, &lsa );
         log_msg( LOG_DEBUG, "Server IP: '%s'  port: %d",
         inet_ntoa( cl_addr.sin_addr ), ntohs( cl_addr.sin_port ) );
-
+        */
         // -- log_msg( LOG_INFO, "[%d]", sock_server );
 
-        first_Socket = i == 0? sock_server: first_Socket;
+        //first_Socket = i == 0? sock_server: first_Socket;
 
-    }
+        //log_msg( LOG_INFO, "[%d]", i);
+
+   // }
     
 
     // go!
 
-        for( int i = 0; i < NUM_CLIENT; i ++ )
-        {
+       for( int i = 0; i < NUM_CLIENT; i ++ )
+       {
+
+            sock_server = socket( AF_INET, SOCK_STREAM, 0 );
+            if ( sock_server == -1 )
+            {
+                log_msg( LOG_ERROR, "Unable to create socket.");
+                exit( 1 );
+            }
+
+            // connect to server
+            if ( connect( sock_server, ( sockaddr * ) &cl_addr, sizeof( cl_addr ) ) < 0 )
+            {
+                log_msg( LOG_ERROR, "Unable to connect server." );
+                exit( 1 );
+            }
+
+            uint lsa = sizeof( cl_addr );
+            // my IP
+            getsockname( sock_server, ( sockaddr * ) &cl_addr, &lsa );
+            log_msg( LOG_DEBUG, "My IP: '%s'  port: %d",
+                    inet_ntoa( cl_addr.sin_addr ), ntohs( cl_addr.sin_port ) );
+            // server IP
+            getpeername( sock_server, ( sockaddr * ) &cl_addr, &lsa );
+            log_msg( LOG_DEBUG, "Server IP: '%s'  port: %d",
+            inet_ntoa( cl_addr.sin_addr ), ntohs( cl_addr.sin_port ) );
 
             if( fork() == 0 )
             {
 
-                int phase = 0,
-                    fork_server_sockted = first_Socket + i;
+                int phase = 0;
 
                 bool is_reader = i % 2;
 
@@ -379,6 +397,8 @@ int main( int argn, char **arg )
                 log_msg( LOG_INFO, "NUM_CLIENT: %d", NUM_CLIENT);
                 log_msg( LOG_INFO, "first_Socket: %d", first_Socket);
                 */
+
+                
 
                 while( true )
                 {
@@ -411,8 +431,8 @@ int main( int argn, char **arg )
                     }
 
                     // -- log_msg( LOG_INFO, "%s", request.c_str() );
-                    dprintf( fork_server_sockted, "%s", request.c_str() );
-                    log_msg( LOG_INFO, "[%d]: %s", fork_server_sockted, request.c_str() );
+                    dprintf( sock_server, "%s", request.c_str() );
+                    log_msg( LOG_INFO, "[%d]: %s", sock_server, request.c_str() );
 
                     
                     // set of handles
@@ -422,10 +442,10 @@ int main( int argn, char **arg )
                     // add stdin
                     FD_SET( STDIN_FILENO, &read_wait_set );
                     // add socket
-                    FD_SET( fork_server_sockted, &read_wait_set );
+                    FD_SET( sock_server, &read_wait_set );
 
                     // select from handles
-                    if ( select( fork_server_sockted + 1, &read_wait_set, 0, 0, 0 ) < 0 ) break;
+                    if ( select( sock_server + 1, &read_wait_set, 0, 0, 0 ) < 0 ) break;
 
                     // data on stdin?
                     if ( FD_ISSET( STDIN_FILENO, &read_wait_set ) )
@@ -440,7 +460,7 @@ int main( int argn, char **arg )
 
 
                         // send data to server
-                        l = write( fork_server_sockted, buf, l );
+                        l = write( sock_server, buf, l );
                         if ( l < 0 )
                             log_msg( LOG_ERROR, "Unable to send data to server." );
                         else
@@ -449,10 +469,10 @@ int main( int argn, char **arg )
                     }
 
                     // data from server?
-                    if ( FD_ISSET( fork_server_sockted, &read_wait_set ) )
+                    if ( FD_ISSET( sock_server, &read_wait_set ) )
                     {
                         // read data from server
-                        int l = readLine( fork_server_sockted, buf, sizeof( buf ) );
+                        int l = readLine( sock_server, buf, sizeof( buf ) );
                         if ( !l )
                         {
                             log_msg( LOG_DEBUG, "Server closed socket." );
@@ -465,7 +485,7 @@ int main( int argn, char **arg )
                         }
                         // display on stdout
 
-                        log_msg( LOG_INFO, "[%d]: %s", fork_server_sockted, buf );
+                        log_msg( LOG_INFO, "[%d]: %s", sock_server, buf );
                         /*
                         l = write( STDOUT_FILENO, buf, l );
                         fflush( stdout );
@@ -483,7 +503,7 @@ int main( int argn, char **arg )
                         if( std::string( buf ).find( "Naschledanou" ) != std::string::npos )
                         {
 
-                            close( fork_server_sockted );
+                            close( sock_server );
                             exit( 1 );
 
                         }
