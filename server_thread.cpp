@@ -239,6 +239,53 @@ ssize_t readLine( int fd, void *buf, size_t count )
 
 }
 
+// -- Check if message from client is ok
+bool isMessCorrect( const char* buf, int lenght )
+{
+
+    int randNum = 10,
+        returnLenght = 0;
+
+    char y,
+        controlChar = 'D',
+        expectedChar = 'D';
+
+    if( buf[1] == ':')
+    {
+        returnLenght = sscanf( ( const char* )buf, "%c%c", &controlChar, &expectedChar) > 0;
+    }
+    else
+    {
+        returnLenght = sscanf( ( const char* )buf, "%c%d%c", &controlChar, &randNum, &expectedChar) > 0;
+    }
+
+    if( returnLenght > 0 ) 
+    {
+
+        if( ( controlChar == 'W' || controlChar == 'C' || controlChar == 'A' || controlChar == 'I' || controlChar == 'E')
+        && randNum > 9 && randNum < 100 && expectedChar == ':' && lenght < 256 )
+        {
+
+            return true;
+            
+        }
+        else
+        {
+        
+            return false;
+        
+        }
+
+    }
+    else
+    {
+
+        return false;
+    
+    }
+
+}
+
 // **** Thread struct parameters
 
 struct threadParams
@@ -287,18 +334,7 @@ void *comunicationThread( void *vargp )
         if ( FD_ISSET( socket_client, &read_wait_set ) )
         {
 
-            int x,
-                z,
-                lenght,
-                randNum = 10,
-                returnLenght = 0;
-
-            char y,
-                 controlChar = 'D',
-                 expectedChar = 'D';
-
-            bool correct_Mess;
-
+            int lenght;
 
             // --  read data from socket
             sem_wait( sem_accessLibrary );
@@ -318,54 +354,21 @@ void *comunicationThread( void *vargp )
             else
                     log_msg( LOG_DEBUG, "Read %d bytes from client.", lenght );
 
-  
-            if( buf[1] == ':')
-            {
-                returnLenght = sscanf( ( const char* )buf, "%c%c", &controlChar, &expectedChar) > 0;
-            }
-            else
-            {
-                returnLenght = sscanf( ( const char* )buf, "%c%d%c", &controlChar, &randNum, &expectedChar) > 0;
-            }
 
-            // -- log_msg( LOG_INFO, "%s\n", buf );
-
-            if( returnLenght > 0 ) 
+            if( !isMessCorrect( buf, lenght ) )
             {
 
-                if( ( controlChar == 'W' || controlChar == 'C' || controlChar == 'A' || controlChar == 'I' || controlChar == 'E')
-                && randNum > 9 && randNum < 100 && expectedChar == ':' && lenght < 256 )
-                {
-
-                    correct_Mess = true;
-                    // dprintf( socket_client, "Correct message:\t" );    
-                    // log_msg( LOG_INFO, "Correct message:\t\n" );
-                    
-                }
-                else
-                {
-                
-                    correct_Mess = false;
-                    dprintf( socket_client, "Bad message majster:\t\n" );
-                
-                }
+                dprintf( socket_client, "Bad message majster:\t\n" );
 
             }
-            else
-            {
-
-                correct_Mess = false;
-                dprintf( socket_client, "You need to send something:\t\n" );
-            
-            }
-
-            if( correct_Mess )
-            {
+            else {
 
                 std::string input = buf;
 
+                log_msg( LOG_DEBUG, "Pozadavek od [%d]: %s",socket_client, input.c_str() );
+
                 if( input.find( CS_VYNUCENY_KONEC_BOTH ) != std::string::npos )
-                {
+                {// Unexpected end connection from client
 
                     log_msg( LOG_INFO, "Client vynucene ukoncil spojeni" );
                     close( socket_client );
@@ -374,10 +377,10 @@ void *comunicationThread( void *vargp )
                 }
 
                 if( !is_Reader && !is_Writer )
-                {
+                {// Am I reader or writer?
 
                     if( input.find( CS_VSTUP_CT ) != std::string::npos )
-                    {
+                    {// I am Reader
 
                         is_Reader = true;
 
@@ -390,26 +393,24 @@ void *comunicationThread( void *vargp )
                                 sem_wait( sem_readers );
                         sem_post( sem_writers );
 
-                        //log_msg( LOG_INFO, "A%d:%s\n", CI_VYSTUP_CT, CS_VYSTUP_CT );
                         dprintf( socket_client, "A%d:%s\n", CI_VYSTUP_CT, CS_VYSTUP_CT );
 
                     }else
-                    {
+                    {// I am writer
+
                         is_Writer = true;
 
                         log_msg( LOG_INFO, "Spisovatel chce vstoupit: %s", buf );
                         sem_wait( sem_readers );
-                        //sem_wait( sem_writers );
-                        //log_msg( LOG_INFO, "A%d:%s\n", CI_VYSTUP_CT, CS_VYSTUP_CT );
                         dprintf( socket_client, "A%d:%s\n", CI_VYSTUP_SP, CS_VYSTUP_SP );
                         
                     }
 
                 }else
-                {
+                {// Now what these clients want
 
                     if( input.find( CS_DOBA_CT ) != std::string::npos )
-                    {
+                    {// Reader whats to read for some quite of time
 
                         std::stringstream ss;
                         
@@ -417,13 +418,11 @@ void *comunicationThread( void *vargp )
 
                         int from,
                             to,
-                            temp;
+                            randomNum;
 
                         bool first_num = true;
 
                         ss << std::string( buf );
-
-                        log_msg( LOG_DEBUG, "%s", buf );
 
                         while( !ss.eof() )
                         {
@@ -435,29 +434,26 @@ void *comunicationThread( void *vargp )
                                 if ( std::stringstream( word ) >> from )
                                 {
 
-                                    log_msg( LOG_DEBUG, "First number is %d", from );
                                     first_num = !first_num;
 
                                 }
                             }
                             else
                                 if ( std::stringstream( word ) >> to )
-                                    log_msg( LOG_DEBUG, "Second number is %d", to );
 
 
                             word = "";
 
                         }
+                        randomNum = rand()% ( to - from ) + from;
 
-                        sleep( rand()% ( to - from ) + from );
+                        log_msg( LOG_INFO, "Ctenar[%d] bude cist %ds\n",socket_client, randomNum );
+                        sleep( randomNum );
                         dprintf( socket_client, "A%d:%s\n", CI_DATA_CT, CS_DATA_CT );
-                        //sem_post( sem_writers );
-
-
                     }
 
                     else if( input.find( CS_DOBA_SP ) != std::string::npos )
-                    {
+                    {// Writer wants to write
 
                         std::stringstream ss;
                         
@@ -468,35 +464,30 @@ void *comunicationThread( void *vargp )
 
                         ss << std::string( buf );
 
-                        log_msg( LOG_DEBUG, "%s", buf );
-
                         while( !ss.eof() )
                         {
                             
                             ss >> word;
 
-
-                            if ( std::stringstream( word ) >> how_Long )
-                            
-                                log_msg( LOG_DEBUG, "How long number is %d", how_Long );
+                            std::stringstream( word ) >> how_Long;                                
                         
                             word = "";
 
                         }
-
+                        log_msg( LOG_INFO, "Spisovatel[%d] chce psat na %ds\n", socket_client, how_Long );
                         sleep( how_Long );
                         dprintf( socket_client, "A%d:%s\n", CI_HOTOVO_CT, CS_HOTOVO_CT );
-                        //sem_post( sem_writers );
 
                     }
 
                     else if( input.find( CS_KONEC_BOTH ) != std::string::npos )
-                    {
+                    {// They want to finally end
                         
-                        if( is_Reader )
-                        {
 
-                            log_msg( LOG_INFO, "ctenar nas opustil");
+                        if( is_Reader )
+                        {// If it was reader
+
+                            log_msg( LOG_INFO, "ctenar[%d] nas opustil", socket_client);
                             sem_wait( sem_writers );
                                 counter_writers --;
                                 if( counter_writers == 0 )
@@ -504,14 +495,12 @@ void *comunicationThread( void *vargp )
                             sem_post( sem_writers );
 
                         }else
-                        {
+                        {// If it was writer
 
-                            log_msg( LOG_INFO, "spisovatel nas opustil");
+                            log_msg( LOG_INFO, "spisovatel[%d] nas opustil", socket_client);
                             sem_post( sem_readers );
                         }
 
-                        //log_msg( LOG_INFO, "A%d:%s\n", CI_NASCHLEDANOU_BOTH, CS_NASCHLEDANOU_BOTH );
-                        log_msg( LOG_INFO, "A%d:%s\n", CI_KONEC_BOTH, CS_KONEC_BOTH );
                         dprintf( socket_client, "A%d:%s\n", CI_NASCHLEDANOU_BOTH, CS_NASCHLEDANOU_BOTH );
                         close( socket_client );
                         break;
@@ -521,24 +510,7 @@ void *comunicationThread( void *vargp )
                 }
 
             }
-
-
-
-            // write data to client
-            
-            // close request?
-            /*if ( !strncasecmp( buf, "close", strlen( STR_CLOSE ) ) )
-            {
-
-                dprintf( temp, "close");
-                log_msg( LOG_INFO, "Client sent 'close' request to close connection." );
-                close( temp );
-                log_msg( LOG_INFO, "Connection closed. Waiting for new client." );
-                return NULL;
-
-            }*/
-
-            // dprintf( socket_client , "%s", buf);                
+    
         }
 
     } // while communication
@@ -736,7 +708,7 @@ int main( int argn, char **arg )
             if ( FD_ISSET( STDIN_FILENO, &read_wait_set ) )
             { // -- data on stdin
 
-                char buf[ 128 ];
+                char buf[ 256 ];
                 int len = readLine( STDIN_FILENO, buf, sizeof( buf) );
                 if ( len < 0 )
                 {

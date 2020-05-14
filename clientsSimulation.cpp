@@ -241,7 +241,7 @@ ssize_t readLine( int fd, void *buf, size_t count )
 // catch signal
 void catch_sig( int sig )
 {
-    dprintf( sock_server, "W25:Vynuceny konec\n" );
+    dprintf( sock_server, "W%d:%s\n", CI_VYNUCENY_KONEC_BOTH, CS_VYNUCENY_KONEC_BOTH );
     close( sock_server );
     printf( "process[%d] forced to exit\n", getpid() );
     exit( 1 );
@@ -317,44 +317,7 @@ int main( int argn, char **arg )
 
     sockaddr_in cl_addr =  *( sockaddr_in * ) ai_ans->ai_addr;
     cl_addr.sin_port = htons( port );
-    freeaddrinfo( ai_ans );
-
-    //for( int i = 0; i < NUM_CLIENT; i ++ )
-    //{
-
-        // socket creation
-        /*sock_server = socket( AF_INET, SOCK_STREAM, 0 );
-        if ( sock_server == -1 )
-        {
-            log_msg( LOG_ERROR, "Unable to create socket.");
-            exit( 1 );
-        }
-
-        // connect to server
-        if ( connect( sock_server, ( sockaddr * ) &cl_addr, sizeof( cl_addr ) ) < 0 )
-        {
-            log_msg( LOG_ERROR, "Unable to connect server." );
-            exit( 1 );
-        }
-
-        uint lsa = sizeof( cl_addr );
-        // my IP
-        getsockname( sock_server, ( sockaddr * ) &cl_addr, &lsa );
-        log_msg( LOG_DEBUG, "My IP: '%s'  port: %d",
-                inet_ntoa( cl_addr.sin_addr ), ntohs( cl_addr.sin_port ) );
-        // server IP
-        getpeername( sock_server, ( sockaddr * ) &cl_addr, &lsa );
-        log_msg( LOG_DEBUG, "Server IP: '%s'  port: %d",
-        inet_ntoa( cl_addr.sin_addr ), ntohs( cl_addr.sin_port ) );
-        */
-        // -- log_msg( LOG_INFO, "[%d]", sock_server );
-
-        //first_Socket = i == 0? sock_server: first_Socket;
-
-        //log_msg( LOG_INFO, "[%d]", i);
-
-   // }
-    
+    freeaddrinfo( ai_ans );  
 
     // go!
 
@@ -390,15 +353,7 @@ int main( int argn, char **arg )
 
                 int phase = 0;
 
-                bool is_reader = i % 2;
-
-                /*
-                log_msg( LOG_INFO, "fork socket: %d", fork_server_sockted);
-                log_msg( LOG_INFO, "NUM_CLIENT: %d", NUM_CLIENT);
-                log_msg( LOG_INFO, "first_Socket: %d", first_Socket);
-                */
-
-                
+                bool is_reader = i % 2;               
 
                 while( true )
                 {
@@ -424,7 +379,6 @@ int main( int argn, char **arg )
                         break;
                         
                     }
-                    
                     default:
                         request = "C24:Konec\n";
                         break;
@@ -432,7 +386,7 @@ int main( int argn, char **arg )
 
                     // -- log_msg( LOG_INFO, "%s", request.c_str() );
                     dprintf( sock_server, "%s", request.c_str() );
-                    log_msg( LOG_INFO, "[%d]: %s", sock_server, request.c_str() );
+                    log_msg( LOG_INFO, "Pozadavek: [%d]: %s", sock_server, request.c_str() );
 
                     
                     // set of handles
@@ -485,7 +439,7 @@ int main( int argn, char **arg )
                         }
                         // display on stdout
 
-                        log_msg( LOG_INFO, "[%d]: %s", sock_server, buf );
+                        log_msg( LOG_INFO, "Odpoved: [%d]: %s", sock_server, buf );
                         /*
                         l = write( STDOUT_FILENO, buf, l );
                         fflush( stdout );
