@@ -32,8 +32,6 @@
 
 #include "library.h"
 
-#define NUM_CLIENT 20
-
 // debug flag
 int debug = LOG_INFO;
 
@@ -80,7 +78,7 @@ void help( int argn, char **arg )
             "\n"
             "  Socket client example.\n"
             "\n"
-            "  Use: %s [-h -d] ip_or_name port_number\n"
+            "  Use: %s [-h -d] ip_or_name port_number number_of_clients( optional )\n"
             "\n"
             "    -d  debug mode \n"
             "    -h  this help\n"
@@ -256,6 +254,7 @@ int main( int argn, char **arg )
     if ( argn <= 2 ) help( argn, arg );
 
     int port = 0,
+        num_client = 2,
         first_Socket = -1;
 
     char *host = NULL;
@@ -278,7 +277,14 @@ int main( int argn, char **arg )
                 host = arg[ i ];
             else if ( !port )
                 port = atoi( arg[ i ] );
+            else
+            {
+                num_client = atoi( arg[ i ] );
+            }
+            
         }
+        
+
     }
 
     if ( !host || !port )
@@ -321,7 +327,7 @@ int main( int argn, char **arg )
 
     // go!
 
-       for( int i = 0; i < NUM_CLIENT; i ++ )
+       for( int i = 0; i < num_client; i ++ )
        {
 
             sock_server = socket( AF_INET, SOCK_STREAM, 0 );
@@ -380,11 +386,15 @@ int main( int argn, char **arg )
                         
                     }
                     default:
+                    {
+                        
                         request = "C24:Konec\n";
                         break;
+                    
+                    }
+                        
                     }
 
-                    // -- log_msg( LOG_INFO, "%s", request.c_str() );
                     dprintf( sock_server, "%s", request.c_str() );
                     log_msg( LOG_INFO, "Pozadavek: [%d]: %s", sock_server, request.c_str() );
 
@@ -437,23 +447,10 @@ int main( int argn, char **arg )
                         else{
                             log_msg( LOG_DEBUG, "Read %d bytes from server.", l );
                         }
+
                         // display on stdout
-
                         log_msg( LOG_INFO, "Odpoved: [%d]: %s", sock_server, buf );
-                        /*
-                        l = write( STDOUT_FILENO, buf, l );
-                        fflush( stdout );
-                        if ( l < 0 )
-                            log_msg( LOG_ERROR, "Unable to write to stdout." );
-                        */
-
-                        // request to close?
-                        /*if ( !strncasecmp( buf, STR_CLOSE, strlen( STR_CLOSE ) ) )
-                        {
-                            log_msg( LOG_INFO, "Connection will be closed..." );
-                            break;
-                        }*/
-
+                        
                         if( std::string( buf ).find( "Naschledanou" ) != std::string::npos )
                         {
 

@@ -307,8 +307,6 @@ void *comunicationThread( void *vargp )
     bool    is_Reader = false,
             is_Writer = false;
 
-    log_msg( LOG_INFO, " inside socket_client [%d]", socket_client );
-
     while ( 1 )
     { // communication between client and server
         
@@ -326,7 +324,7 @@ void *comunicationThread( void *vargp )
 
         if ( sel < 0 )
         {
-            log_msg( LOG_ERROR, "Select failed!" );
+            log_msg( LOG_ERROR, "Select failed!\n" );
             return NULL;
         }
 
@@ -345,14 +343,14 @@ void *comunicationThread( void *vargp )
             
             if ( !lenght )
             {
-                    log_msg( LOG_DEBUG, "Client closed socket!" );
+                    log_msg( LOG_DEBUG, "Client closed socket!\n" );
                     close( socket_client );
                     break;
             }
             else if ( lenght < 0 )
-                    log_msg( LOG_DEBUG, "Unable to read data from client." );
+                    log_msg( LOG_DEBUG, "Unable to read data from client.\n" );
             else
-                    log_msg( LOG_DEBUG, "Read %d bytes from client.", lenght );
+                    log_msg( LOG_DEBUG, "Read %d bytes from client.\n", lenght );
 
 
             if( !isMessCorrect( buf, lenght ) )
@@ -365,12 +363,12 @@ void *comunicationThread( void *vargp )
 
                 std::string input = buf;
 
-                log_msg( LOG_DEBUG, "Pozadavek od [%d]: %s",socket_client, input.c_str() );
+                log_msg( LOG_DEBUG, "Pozadavek od [%d]: %s\n",socket_client, input.c_str() );
 
                 if( input.find( CS_VYNUCENY_KONEC_BOTH ) != std::string::npos )
                 {// Unexpected end connection from client
 
-                    log_msg( LOG_INFO, "Client vynucene ukoncil spojeni" );
+                    log_msg( LOG_INFO, "Client vynucene ukoncil spojeni\n" );
                     close( socket_client );
                     break;
 
@@ -384,7 +382,7 @@ void *comunicationThread( void *vargp )
 
                         is_Reader = true;
 
-                        log_msg( LOG_INFO, "Citatel chce vstoupit: %s", buf );
+                        log_msg( LOG_INFO, "Citatel chce vstoupit: %s\n", buf );
 
 
                         sem_wait( sem_writers );
@@ -400,7 +398,7 @@ void *comunicationThread( void *vargp )
 
                         is_Writer = true;
 
-                        log_msg( LOG_INFO, "Spisovatel chce vstoupit: %s", buf );
+                        log_msg( LOG_INFO, "Spisovatel chce vstoupit: %s\n", buf );
                         sem_wait( sem_readers );
                         dprintf( socket_client, "A%d:%s\n", CI_VYSTUP_SP, CS_VYSTUP_SP );
                         
@@ -487,7 +485,7 @@ void *comunicationThread( void *vargp )
                         if( is_Reader )
                         {// If it was reader
 
-                            log_msg( LOG_INFO, "ctenar[%d] nas opustil", socket_client);
+                            log_msg( LOG_INFO, "ctenar[%d] nas opustil\n", socket_client);
                             sem_wait( sem_writers );
                                 counter_writers --;
                                 if( counter_writers == 0 )
@@ -497,7 +495,7 @@ void *comunicationThread( void *vargp )
                         }else
                         {// If it was writer
 
-                            log_msg( LOG_INFO, "spisovatel[%d] nas opustil", socket_client);
+                            log_msg( LOG_INFO, "spisovatel[%d] nas opustil\n", socket_client);
                             sem_post( sem_readers );
                         }
 
