@@ -310,7 +310,7 @@ void create_connect( int socket )
         bool    is_Reader = false,
                 is_Writer = false;
 
-        log_msg( LOG_DEBUG, " Client with id: [%d] has connected.", socket_client );
+        log_msg( LOG_DEBUG, " Client with id: [%d] has connected.\n", socket_client );
 
         while ( true )
         { // communication between client and server
@@ -329,7 +329,7 @@ void create_connect( int socket )
 
             if ( sel < 0 )
             {
-                log_msg( LOG_ERROR, "Select failed!" );
+                log_msg( LOG_ERROR, "Select failed!\n" );
                 exit( -1 );
             }
 
@@ -348,14 +348,14 @@ void create_connect( int socket )
                 
                 if ( !lenght )
                 {
-                        log_msg( LOG_DEBUG, "Client closed socket!" );
+                        log_msg( LOG_DEBUG, "Client closed socket!\n" );
                         close( socket_client );
                         break;
                 }
                 else if ( lenght < 0 )
-                        log_msg( LOG_DEBUG, "Unable to read data from client." );
+                        log_msg( LOG_DEBUG, "Unable to read data from client.\n" );
                 else
-                        log_msg( LOG_DEBUG, "Read %d bytes from client.", lenght );
+                        log_msg( LOG_DEBUG, "Read %d bytes from client.\n", lenght );
 
     
                 if( !isMessCorrect( buf, lenght ) )
@@ -368,12 +368,12 @@ void create_connect( int socket )
 
                     std::string input = buf;
 
-                    log_msg( LOG_DEBUG, "Pozadavek od [%d]: %s",socket_client, input.c_str() );
+                    log_msg( LOG_DEBUG, "Pozadavek od [%d]: %s\n",socket_client, input.c_str() );
 
                     if( input.find( CS_VYNUCENY_KONEC_BOTH ) != std::string::npos )
                     {// Unexpected end connection from client
 
-                        log_msg( LOG_INFO, "Client vynucene ukoncil spojeni" );
+                        log_msg( LOG_INFO, "Client vynucene ukoncil spojeni\n" );
                         close( socket_client );
                         break;
 
@@ -387,7 +387,7 @@ void create_connect( int socket )
 
                             is_Reader = true;
 
-                            log_msg( LOG_INFO, "Citatel chce vstoupit: %s", buf );
+                            log_msg( LOG_INFO, "Citatel chce vstoupit: %s\n", buf );
 
 
                             sem_wait( sem_writers );
@@ -403,7 +403,7 @@ void create_connect( int socket )
 
                             is_Writer = true;
 
-                            log_msg( LOG_INFO, "Spisovatel chce vstoupit: %s", buf );
+                            log_msg( LOG_INFO, "Spisovatel chce vstoupit: %s\n", buf );
                             sem_wait( sem_readers );
                             dprintf( socket_client, "A%d:%s\n", CI_VYSTUP_SP, CS_VYSTUP_SP );
                             
@@ -490,7 +490,7 @@ void create_connect( int socket )
                             if( is_Reader )
                             {// If it was reader
 
-                                log_msg( LOG_INFO, "ctenar[%d] nas opustil", socket_client);
+                                log_msg( LOG_INFO, "ctenar[%d] nas opustil\n", socket_client);
                                 sem_wait( sem_writers );
                                     glb_data->counter_writers --;
                                     if( glb_data->counter_writers == 0 )
@@ -500,7 +500,7 @@ void create_connect( int socket )
                             }else
                             {// If it was writer
 
-                                log_msg( LOG_INFO, "spisovatel[%d] nas opustil", socket_client);
+                                log_msg( LOG_INFO, "spisovatel[%d] nas opustil\n", socket_client);
                                 sem_post( sem_readers );
                             }
 
