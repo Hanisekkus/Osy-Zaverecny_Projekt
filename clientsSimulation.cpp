@@ -471,8 +471,11 @@ int main( int argn, char **arg )
 
         }// -- For which creates Forks
 
-        while( true )
-            sleep( 2 );
+        for( int i = 0; i < num_client; i ++ )
+            wait( NULL );
+
+        //while( true )
+          //  sleep( 2 );
 
     return 0;
 }
