@@ -1,6 +1,6 @@
 # [Osy] Závěrečný projekt
 
-*Read this in other language: [**english**](https://github.com/Hanisekkus/Osy-Zaverecny_Projekt), [**czech**](https://github.com/Hanisekkus/Osy-Zaverecny_Projekt/blob/master/README.cz.md)*
+*Možné číst v těchto jazycích: [**english**](https://github.com/Hanisekkus/Osy-Zaverecny_Projekt), [**czech**](https://github.com/Hanisekkus/Osy-Zaverecny_Projekt/blob/master/README.cz.md)*
 
 Závěrečný projekt do předmětu Osy psán v C++.
   
