@@ -11,7 +11,7 @@ Závěrečný projekt do předmětu Osy psán v C++.
 ### C++
 * Ujisti se, že máš GNU C/C++ kompilátor.
  
-  > *[CZ] Vyzkoušeno na verzi 9.3.0*  
+  > *Vyzkoušeno na verzi 9.3.0*  
 
 ### Naklonuj si projekt
 * V terminálu:
