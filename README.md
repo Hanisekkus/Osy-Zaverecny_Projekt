@@ -56,7 +56,7 @@ Final project to succesfull finish subject [Osy] written in C++.
   ./clientsSimulation [ip_or_name] [port_number] [number_of_clients](volitelné/optional)
   ```
   
-  >* For example:*
+  >*For example:*
   >**<pre>  ./clientsSimulation localhost 1234</pre>**
 
 * Done
