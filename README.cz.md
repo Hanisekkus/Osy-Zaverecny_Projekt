@@ -1,78 +1,65 @@
-# [Osy] Závěrečný projekt/Final project
+# [Osy] Závěrečný projekt
 
-[CZ] Závěrečný projekt do předmětu Osy psán v C++.
+*Read this in other language: [**english**](https://github.com/Hanisekkus/Osy-Zaverecny_Projekt), [**czech**](https://github.com/Hanisekkus/Osy-Zaverecny_Projekt/blob/master/README.cz.md)*
+
+Závěrečný projekt do předmětu Osy psán v C++.
   
-* [CZ] Projekt řeší IPC problém [spisovatelé-čtenáři](https://cs.qwe.wiki/wiki/Readers%E2%80%93writers_problem).
+* Projekt řeší IPC problém [spisovatelé-čtenáři](https://cs.qwe.wiki/wiki/Readers%E2%80%93writers_problem).
 
-[ENG] Final project to succesfull finish subject [Osy] written in C++.
-
-* [ENG] The project solves IPC problem [readers-writers](https://en.wikipedia.org/wiki/Readers%E2%80%93writers_problem).
-
-## Instalace/Instalation
+## Instalace
 
 ### C++
-* [CZ] Ujisti se, že máš GNU C/C++ kompilátor.
-* [ENG] Make sure you have installed GNU C/C++ compiler.
+* Ujisti se, že máš GNU C/C++ kompilátor.
  
-  > *[CZ] Vyzkoušeno na verzi 9.3.0*
-  
-  > *[ENG] Tested on v.9.3.0*
+  > *[CZ] Vyzkoušeno na verzi 9.3.0*  
 
-### Naklonuj si projekt/Clone the project
-* [CZ] V terminálu:<br />
-[ENG] In terminal:
+### Naklonuj si projekt
+* V terminálu:
 
    ```bash
    git clone https://github.com/Hanisekkus/Osy-Zaverecny_Projekt.git
    ```
 
-**_.. nebo/or_** 
-* [CZ] V prohlížeci:<br />
-[ENG] In browser:
+**_.. nebo_** 
+* V prohlížeci:
 
-   [**Stáhnout/Download**](https://github.com/Hanisekkus/Osy-Zaverecny_Projekt/archive/master.zip)
+   [**Stáhnout**](https://github.com/Hanisekkus/Osy-Zaverecny_Projekt/archive/master.zip)
 
-## Spuštení/Usage
+## Spuštení
 
-* [CZ] V terminálu ve složce s projektem:<br />
-[ENG] In terminal goes to the directory with project:
+* V terminálu ve složce s projektem:
 
    ```bash
    make
    ```
    
-   > *[CZ] Pro smazání binárek:<br />*
-   > *[ENG] For delete binary files:*
+   > *Pro smazání binárek:*
    > **<pre>  make clean</pre>**
    
-* [CZ] Po kompilaci projektu:<br />
-[ENG] After compilation of project:
+* Po kompilaci projektu:
 
   ```bash
   ./server_fork [port_number]
   ```
-  **_.. nebo/or_** 
+  **_.. nebo_** 
    ```bash
   ./server_thread [port_number]
   ```
   
-  >*[CZ] Například:<br />*
-  >*[ENG] For example:<br />*
+  >*Například:*
   >**<pre> ./server_fork 1234</pre>**
   
   
-* [CZ] Otevři si další terminál/y ve složce s projektem:<br />
-[ENG] Open another terminal or terminals in project directory:
+* Otevři si další terminál/y ve složce s projektem:
 
   ```bash
   ./clientsSimulation [ip_or_name] [port_number] [number_of_clients](volitelné/optional)
   ```
   
-  >*[CZ] Například:<br />*
-  >*[ENG] For example:*
+  >*Například:*
   >**<pre>  ./clientsSimulation localhost 1234</pre>**
 
-* Hotovo/Done
+* Hotovo
 
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)
